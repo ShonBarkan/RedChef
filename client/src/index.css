@@ -1,1 +1,22 @@
 @import "tailwindcss";
+
+body {
+  @apply bg-cover bg-center bg-no-repeat min-h-screen;
+  background-image: url('/assets/background.png');
+}
+
+.perspective {
+  perspective: 1000px;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+}
+
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
