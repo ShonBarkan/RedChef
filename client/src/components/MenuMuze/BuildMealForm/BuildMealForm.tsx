@@ -187,7 +187,7 @@ const BuildMealForm: React.FC = () => {
   return (
     <form 
       onSubmit={handleSubmit} 
-      className="w-full max-w-4xl mx-auto p-6 bg-[rgba(255,248,249,0.96)] rounded-xl shadow-md"
+      className="w-full max-w-3xl mx-auto p-6 bg-[rgba(255,248,249,0.96)] rounded-xl shadow-md"
     >
       <h2 className="text-3xl font-extrabold text-[#E94B3C] mb-6 font-poppins">Build Your Meal</h2>
       

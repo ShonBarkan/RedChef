@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import type { Meal } from '../../../types/meal';
+import type { Meal, SelectedIngredient } from '../../../types/meal';
 
 interface MealDetailsProps {
   meal: Meal;
@@ -39,14 +39,40 @@ const MealDetails: React.FC<MealDetailsProps> = ({ meal, onClose, onSave }) => {
     }));
   };
 
-  const handleIngredientChange = (index: number, value: string) => {
+  const handleIngredientChange = (index: number, field: 'name' | 'grams', value: string | number) => {
     const newIngredients = [...editedMeal.ingredients];
-    newIngredients[index] = value;
+    if (field === 'name') {
+      newIngredients[index] = {
+        ...newIngredients[index],
+        ingredient: {
+          ...newIngredients[index].ingredient,
+          name: value as string
+        }
+      };
+    } else {
+      newIngredients[index] = {
+        ...newIngredients[index],
+        grams: value as number
+      };
+    }
     setEditedMeal(prev => ({ ...prev, ingredients: newIngredients }));
   };
 
   const handleAddIngredient = () => {
-    setEditedMeal(prev => ({ ...prev, ingredients: [...prev.ingredients, ''] }));
+    setEditedMeal(prev => ({
+      ...prev,
+      ingredients: [
+        ...prev.ingredients,
+        {
+          ingredient: {
+            id: `new-${Date.now()}`,
+            name: '',
+            nutrition: { calories: 0, protein: 0, carbs: 0, fat: 0 }
+          },
+          grams: 0
+        }
+      ]
+    }));
   };
 
   const handleRemoveIngredient = (index: number) => {
@@ -126,7 +152,7 @@ const MealDetails: React.FC<MealDetailsProps> = ({ meal, onClose, onSave }) => {
             {/* Basic Info */}
             <div>
               <h3 className="text-lg font-semibold mb-3">Basic Information</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Name
@@ -154,7 +180,17 @@ const MealDetails: React.FC<MealDetailsProps> = ({ meal, onClose, onSave }) => {
                       className="w-full p-2 border rounded-lg"
                     />
                   ) : (
-                    <p className="text-gray-900">{meal.imageUrl || 'No image'}</p>
+                    <div className="mt-2">
+                      {meal.imageUrl ? (
+                        <img 
+                          src={meal.imageUrl} 
+                          alt={meal.name}
+                          className="w-full h-48 object-cover rounded-lg"
+                        />
+                      ) : (
+                        <p className="text-gray-500">No image available</p>
+                      )}
+                    </div>
                   )}
                 </div>
               </div>
@@ -245,9 +281,17 @@ const MealDetails: React.FC<MealDetailsProps> = ({ meal, onClose, onSave }) => {
                       <>
                         <input
                           type="text"
-                          value={ingredient}
-                          onChange={(e) => handleIngredientChange(index, e.target.value)}
+                          value={ingredient.ingredient.name}
+                          onChange={(e) => handleIngredientChange(index, 'name', e.target.value)}
+                          placeholder="Ingredient name"
                           className="flex-1 p-2 border rounded-lg"
+                        />
+                        <input
+                          type="number"
+                          value={ingredient.grams}
+                          onChange={(e) => handleIngredientChange(index, 'grams', Number(e.target.value))}
+                          placeholder="Grams"
+                          className="w-24 p-2 border rounded-lg"
                         />
                         <button
                           onClick={() => handleRemoveIngredient(index)}
@@ -257,7 +301,9 @@ const MealDetails: React.FC<MealDetailsProps> = ({ meal, onClose, onSave }) => {
                         </button>
                       </>
                     ) : (
-                      <span className="text-gray-900">{ingredient}</span>
+                      <span className="text-gray-900">
+                        {ingredient.ingredient.name} ({ingredient.grams}g)
+                      </span>
                     )}
                   </li>
                 ))}

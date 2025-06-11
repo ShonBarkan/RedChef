@@ -28,7 +28,7 @@ export interface MealData {
 export interface Meal {
   id: string;
   name: string;
-  ingredients: string[];
+  ingredients: SelectedIngredient[];
   instructions: string[];
   prepTime: number;
   cookTime: number;

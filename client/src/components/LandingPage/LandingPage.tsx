@@ -3,14 +3,14 @@ import StuffCard from './StuffCard/StuffCard';
 
 const stuffList = [
   {
-    imgSrc: "/assets/me (2).png",
+    imgSrc: "/assets/CalPal_face.png",
     title: "CalPal",
     catchyPhrase: "Let me help you track those calories and hit your goals!",
     description: "Your nutrition buddy, tracking calories, protein, and more to keep you on point.",
     navigateTo: "/CalPal",
   },
   {
-    imgSrc: "/assets/jump.png",
+    imgSrc: "/assets/menumuze_face.png",
     title: "MenuMuze",
     catchyPhrase: "Ready to craft delicious menus? I’m your creative partner!",
     description: "Your creative muse for writing menus and building delicious meal plans.",

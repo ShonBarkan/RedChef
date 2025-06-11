@@ -19,6 +19,9 @@ const Menu: React.FC = () => {
     }
   });
   const [selectedMeal, setSelectedMeal] = useState<Meal | null>(null);
+  const [isAdvancedFiltersOpen, setIsAdvancedFiltersOpen] = useState(false);
+  const [tagSearchTerm, setTagSearchTerm] = useState('');
+  const [isTagFilterAnd, setIsTagFilterAnd] = useState(false);
 
   // Update meals when mealData changes
   React.useEffect(() => {
@@ -27,7 +30,7 @@ const Menu: React.FC = () => {
       const newMeal: Meal = {
         id: Date.now().toString(), // Generate a unique ID
         name: mealData.name,
-        ingredients: mealData.ingredients.map((ing: SelectedIngredient) => `${ing.ingredient.name} (${ing.grams}g)`),
+        ingredients: mealData.ingredients,
         instructions: [mealData.instructions],
         prepTime: mealData.prepTime,
         cookTime: mealData.cookTime,
@@ -69,7 +72,11 @@ const Menu: React.FC = () => {
 
   const filteredMeals = meals.filter(meal => {
     const matchesSearch = meal.name.toLowerCase().includes(filters.searchTerm.toLowerCase());
-    const matchesTags = filters.tags.length === 0 || filters.tags.some((tag: string) => meal.tags.includes(tag));
+    const matchesTags = filters.tags.length === 0 || (
+      isTagFilterAnd
+        ? filters.tags.every((tag: string) => meal.tags.includes(tag))
+        : filters.tags.some((tag: string) => meal.tags.includes(tag))
+    );
     const matchesNutrition = Object.entries(filters.nutritionRange).every(([key, [min, max]]) => {
       const value = meal.nutrition[key as keyof typeof meal.nutrition];
       return value >= min && value <= max;
@@ -83,7 +90,7 @@ const Menu: React.FC = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="w-full max-w-5xl mx-auto p-6 bg-[rgba(255,248,249,0.96)] rounded-xl shadow-md">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-[#E94B3C] mb-4">Menu</h1>
         
@@ -96,46 +103,102 @@ const Menu: React.FC = () => {
           onChange={(e) => handleSearch(e.target.value)}
         />
 
-        {/* Tags Filter */}
-        <div className="flex flex-wrap gap-2 mb-4">
-          {Array.from(new Set(meals.flatMap(meal => meal.tags))).map(tag => (
-            <button
-              key={tag}
-              onClick={() => handleTagFilter(tag)}
-              className={`px-3 py-1 rounded-full text-sm ${
-                filters.tags.includes(tag)
-                  ? 'bg-[#E94B3C] text-white'
-                  : 'bg-gray-200 text-gray-700'
-              }`}
-            >
-              {tag}
-            </button>
-          ))}
-        </div>
+        {/* Advanced Filters Toggle */}
+        <button
+          onClick={() => setIsAdvancedFiltersOpen(!isAdvancedFiltersOpen)}
+          className="flex items-center gap-2 text-[#E94B3C] font-medium mb-4"
+        >
+          <span>{isAdvancedFiltersOpen ? '▼' : ''}</span>
+          Advanced Filters
+        </button>
 
-        {/* Nutrition Range Filters */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          {Object.entries(filters.nutritionRange).map(([nutrient, [min, max]]) => (
-            <div key={nutrient} className="flex flex-col">
-              <label className="text-sm font-medium mb-1 capitalize">{nutrient}</label>
-              <div className="flex gap-2">
+        {/* Advanced Filters Section */}
+        {isAdvancedFiltersOpen && (
+          <div className="bg-white p-4 rounded-lg shadow-sm mb-6">
+            {/* Tag Search and Filter */}
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-3">
                 <input
-                  type="number"
-                  value={min}
-                  onChange={(e) => handleNutritionRangeChange(nutrient as keyof MealFilters['nutritionRange'], [Number(e.target.value), max])}
-                  className="w-20 p-1 border rounded"
+                  type="text"
+                  placeholder="Search tags..."
+                  className="w-full p-2 border border-gray-300 rounded-lg mr-3"
+                  value={tagSearchTerm}
+                  onChange={(e) => setTagSearchTerm(e.target.value)}
                 />
-                <span>-</span>
-                <input
-                  type="number"
-                  value={max}
-                  onChange={(e) => handleNutritionRangeChange(nutrient as keyof MealFilters['nutritionRange'], [min, Number(e.target.value)])}
-                  className="w-20 p-1 border rounded"
-                />
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium">Filter mode:</span>
+                  <button
+                    onClick={() => setIsTagFilterAnd(!isTagFilterAnd)}
+                    className={`px-3 py-1 rounded text-sm ${
+                      isTagFilterAnd
+                        ? 'bg-[#E94B3C] text-white'
+                        : 'bg-gray-200 text-gray-700'
+                    }`}
+                  >
+                    {isTagFilterAnd ? 'AND' : 'OR'}
+                  </button>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {Array.from(new Set(meals.flatMap(meal => meal.tags)))
+                  .filter(tag => tag.toLowerCase().includes(tagSearchTerm.toLowerCase()))
+                  .map(tag => (
+                    <button
+                      key={tag}
+                      onClick={() => handleTagFilter(tag)}
+                      className={`px-3 py-1 rounded-full text-sm ${
+                        filters.tags.includes(tag)
+                          ? 'bg-[#E94B3C] text-white'
+                          : 'bg-gray-200 text-gray-700'
+                      }`}
+                    >
+                      {tag}
+                    </button>
+                  ))}
               </div>
             </div>
-          ))}
-        </div>
+
+            {/* Nutrition Range Filters */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {Object.entries(filters.nutritionRange).map(([nutrient, [min, max]]) => (
+                <div key={nutrient} className="flex flex-col">
+                  <label className="text-sm font-medium mb-1 capitalize">{nutrient}</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="number"
+                      value={min}
+                      onChange={(e) => {
+                        const newMin = Number(e.target.value);
+                        if (newMin <= max) {
+                          handleNutritionRangeChange(
+                            nutrient as keyof MealFilters['nutritionRange'],
+                            [newMin, max]
+                          );
+                        }
+                      }}
+                      className="w-20 p-1 border rounded"
+                    />
+                    <span>-</span>
+                    <input
+                      type="number"
+                      value={max}
+                      onChange={(e) => {
+                        const newMax = Number(e.target.value);
+                        if (newMax >= min) {
+                          handleNutritionRangeChange(
+                            nutrient as keyof MealFilters['nutritionRange'],
+                            [min, newMax]
+                          );
+                        }
+                      }}
+                      className="w-20 p-1 border rounded"
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Meal Grid */}

@@ -53,6 +53,20 @@ const MealCard: React.FC<MealCardProps> = ({ meal, onRemove, onViewDetails }) =>
           ))}
         </div>
 
+        {/* Ingredients Preview */}
+        <div className="mb-3">
+          <p className="text-sm text-gray-600 mb-1">Ingredients:</p>
+          <div className="text-sm text-gray-800">
+            {meal.ingredients.slice(0, 3).map((ing, index) => (
+              <span key={index}>
+                {ing.ingredient.name} ({ing.grams}g)
+                {index < Math.min(2, meal.ingredients.length - 1) ? ', ' : ''}
+              </span>
+            ))}
+            {meal.ingredients.length > 3 && '...'}
+          </div>
+        </div>
+
         {/* Nutrition Info */}
         <div className="grid grid-cols-2 gap-2 text-sm">
           <div className="flex justify-between">
