@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import type { Meal, SelectedIngredient } from '../../../types/meal';
+import type { Meal } from '../../../types/meal';
 
 interface MealDetailsProps {
   meal: Meal;
