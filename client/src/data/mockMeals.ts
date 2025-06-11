@@ -1,4 +1,4 @@
-import type { Meal, SelectedIngredient, Ingredient } from '../types/meal';
+import type { Meal, Ingredient } from '../types/meal';
 
 // Define base ingredients with their nutrition info per 100g
 const baseIngredients: Record<string, Ingredient> = {
